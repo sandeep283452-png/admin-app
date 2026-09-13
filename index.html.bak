@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EarnPro - Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial; background-color: #f4f4f4; text-align: center; padding: 50px 20px; }
+        .box { background: white; padding: 30px 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+        input { width: 90%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        button { width: 95%; padding: 15px; background: #25D366; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>EarnPro में आपका स्वागत है</h2>
+        <p>ऐप में जाने के लिए रजिस्टर करें</p>
+        
+        <form id="sheetdb-form" action="https://sheetdb.io/api/v1/x4j8o74gzhy7w" method="POST">
+            <input type="text" name="data[Name]" placeholder="अपना पूरा नाम लिखें" required>
+            <input type="number" name="data[Number]" placeholder="अपना WhatsApp नंबर डालें" required>
+            <input type="hidden" name="data[Coins]" value="0">
+            
+            <button type="submit" id="submit-btn">Register & Enter App</button>
+        </form>
+    </div>
+
+    <script>
+        var form = document.getElementById('sheetdb-form');
+        var btn = document.getElementById('submit-btn');
+        
+        form.addEventListener("submit", e => {
+          e.preventDefault();
+          btn.innerHTML = "रजिस्टर हो रहा है..."; 
+          
+          fetch(form.action, {
+              method : "POST",
+              body: new FormData(document.getElementById("sheetdb-form")),
+          }).then(
+              response => response.json()
+          ).then((html) => {
+            window.location.href = 'https://sandeep283452-png.github.io/My-aap-/home.html';
+          });
+        });
+    </script>
+</body>
+</html>
