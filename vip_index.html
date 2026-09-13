@@ -1,0 +1,514 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Magnet - Pro Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: linear-gradient(180deg, #e6faed 0%, #f4fdf8 50%, #ffffff 100%); display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        .app-frame { width: 100%; max-width: 400px; height: 100vh; position: relative; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); background: transparent; }
+        
+        .header { background: white; color: #166534; padding: 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 10px; position: relative;}
+        .header h2 { font-weight: 800; font-size: 24px; display: inline-block;}
+        
+        .menu-icon { position: absolute; right: 20px; top: 22px; font-size: 26px; cursor: pointer; color: #166534; font-weight: bold; }
+        
+        .lang-dropdown { display: none; position: absolute; top: 65px; right: 20px; background: white; border: 1px solid #bbf7d0; padding: 15px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 1000; text-align: left; width: max-content; }
+        .lang-dropdown h4 { color: #0f5132; margin-bottom: 10px; font-size: 14px; }
+        
+        .notice-board { background-color: #f0fdf4; color: #166534; padding: 12px; border-radius: 12px; font-size: 12px; margin-top: 15px; line-height: 1.5; border: 1px solid #bbf7d0; text-align: left; }
+        
+        .content-area { flex: 1; padding: 15px; overflow-y: auto; padding-bottom: 90px; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: linear-gradient(135deg, #0f5132, #146c43); color: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 8px 15px rgba(20, 108, 67, 0.2); text-align: center; position: relative; overflow: hidden; }
+        .card h3 { color: #ffffff; margin-bottom: 10px; font-size: 18px; }
+        .card p { color: #d1e7dd; font-size: 14px; margin-bottom: 15px; }
+        
+        .coin-balance { font-size: 45px; font-weight: bold; color: #ffffff; margin: 15px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .action-btn { background: #b6ff40; color: #0f5132; border: none; padding: 14px 20px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; display: block; text-decoration: none; box-shadow: 0 4px 10px rgba(182, 255, 64, 0.3); margin-bottom: 8px; }
+        .action-btn:hover { transform: scale(0.98); }
+        
+        .key-input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #b6ff40; background: rgba(255,255,255,0.1); color: white; font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 15px; outline: none; }
+        .key-input::placeholder { color: #d1e7dd; opacity: 0.8; }
+        
+        .refer-card { background: linear-gradient(135deg, #198754, #20c997); }
+        
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 5px; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); border-top-left-radius: 25px; border-top-right-radius: 25px; }
+        .nav-item { text-align: center; color: #a3a3a3; cursor: pointer; flex: 1; padding: 5px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-item .icon { font-size: 24px; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; }
+        .nav-item .label { font-size: 11px; font-weight: 700; }
+        .nav-item.active { color: #166534; }
+        .nav-item.active .icon { background: #166534; color: #b6ff40; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+        .modal-content { background: white; padding: 30px 20px; border-radius: 24px; text-align: center; width: 85%; max-width: 350px; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 14px; margin-top: 8px; margin-bottom: 15px; border-radius: 12px; border: 2px solid #e2e8f0; font-weight: bold; font-size: 15px; outline: none; background: #f8fafc; color: #334155; }
+        select:focus, input:focus { border-color: #166534; }
+        label { color: white; font-size: 13px; font-weight: bold; display: block; text-align: left; margin-bottom: 5px; }
+
+        .wheel-wrapper { position: relative; width: 260px; height: 260px; margin: 20px auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 6px solid #0f5132; box-shadow: 0 0 15px rgba(0,0,0,0.2); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); position: relative; overflow: hidden; background: conic-gradient(#b6ff40 0deg 45deg, #ffffff 45deg 90deg, #b6ff40 90deg 135deg, #ffffff 135deg 180deg, #b6ff40 180deg 225deg, #ffffff 225deg 270deg, #b6ff40 270deg 315deg, #ffffff 315deg 360deg); }
+        .slice-text { position: absolute; top: 0; left: 50%; width: 60px; height: 50%; margin-left: -30px; transform-origin: 50% 100%; display: flex; justify-content: center; align-items: flex-start; padding-top: 15px; font-weight: 900; font-size: 16px; color: #0f5132; text-align: center; line-height: 1.1; }
+        .st1 { transform: rotate(22.5deg); } .st2 { transform: rotate(67.5deg); color: #666; font-size: 14px; } .st3 { transform: rotate(112.5deg); } .st4 { transform: rotate(157.5deg); color: #d9534f; font-size: 18px; } .st5 { transform: rotate(202.5deg); } .st6 { transform: rotate(247.5deg); color: #666; font-size: 14px; } .st7 { transform: rotate(292.5deg); color: #d9534f; font-size: 18px; } .st8 { transform: rotate(337.5deg); color: #d9534f; font-size: 18px; }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ff3b30; z-index: 10; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); }
+        .spin-btn { background: #b6ff40; border: 4px solid #0f5132; color: #0f5132; font-weight: bold; width: 70px; height: 70px; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .spin-btn:active { transform: translate(-50%, -50%) scale(0.95); }
+        .pending-box { background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; text-align: left; }
+        .pending-box h4 { color: #ffb300; margin-bottom: 5px; font-size: 18px;}
+        .pending-box p { color: white; font-size: 14px; margin-bottom: 3px; }
+        
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0px !important; }
+    </style>
+</head>
+<body>
+
+<div id="bonus-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="font-size: 24px; color: #0f5132;">🎉 Congratulations! 🎉</h2>
+        <p style="color: #666; margin-top: 10px; font-size: 15px;">EarnApp में आपका स्वागत है! आपको मिलता है शानदार साइनअप बोनस।</p>
+        <div style="font-size: 35px; font-weight: bold; color: #166534; margin: 20px 0;">🪙 10 Coins</div>
+        <button id="claim-btn" class="action-btn">🎁 Claim Now</button>
+    </div>
+</div>
+
+<div id="custom-alert-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 id="custom-alert-title" style="font-size: 20px; color: #0f5132; margin-bottom: 10px;">Message</h2>
+        <p id="custom-alert-message" style="color: #475569; font-size: 15px; margin-bottom: 20px; line-height: 1.5;"></p>
+        <button onclick="closeCustomAlert()" class="action-btn">OK</button>
+    </div>
+</div>
+
+<div id="withdraw-modal" class="modal-overlay">
+    <div class="modal-content" style="background: linear-gradient(135deg, #0f5132, #146c43);">
+        <h2 style="font-size: 20px; color: white; margin-bottom: 5px;">Withdraw Details</h2>
+        <p style="color: #d1e7dd; font-size: 13px; margin-bottom: 20px;">अपना पेमेंट तरीका और डिटेल्स दर्ज करें</p>
+        
+        <label>Enter Amount (Coins):</label>
+        <input type="number" id="withdraw-amount-custom" placeholder="ex: 50000" required>
+
+        <label>Payment Method:</label>
+        <select id="final-withdraw-method">
+            <option value="UPI">UPI ID</option>
+            <option value="Bank">Bank Account (A/C + IFSC)</option>
+            <option value="Paytm">Paytm Number</option>
+        </select>
+        
+        <label>Enter Details:</label>
+        <input type="text" id="withdraw-details" placeholder="ex: 9876543210@ybl or A/C details" required>
+        
+        <button onclick="submitWithdrawal()" class="action-btn" style="margin-top: 10px;">Submit Request</button>
+        <button onclick="closeWithdrawModal()" class="action-btn" style="background: transparent; border: 2px solid #b6ff40; color: #b6ff40; margin-top: 10px;">Cancel</button>
+    </div>
+</div>
+
+<div class="app-frame" id="main-app">
+    <div class="header">
+        <h2>Cash Magnet</h2>
+        <div class="menu-icon" onclick="toggleLanguageMenu()">☰</div>
+        
+        <div id="lang-menu" class="lang-dropdown">
+            <h4>Select Language / भाषा चुनें:</h4>
+            <div id="google_translate_element"></div>
+        </div>
+
+        <div class="notice-board">
+            <strong>Admin Mode Active:</strong> All limits removed. Use your 250 Secret Keys in Tasks for massive unlimited rewards!
+        </div>
+    </div>
+
+    <div class="content-area">
+        
+        <!-- WALLET & HISTORY SECTION (DEFAULT ACTIVE) -->
+        <div id="wallet-section" class="tab-content active">
+            <div class="card">
+                <h3>Cash Magnet Wallet</h3>
+                <div class="coin-balance" id="wallet-balance">🪙 0</div>
+            </div>
+            
+            <div class="card" style="text-align: left; padding: 15px;">
+                <h3 style="text-align: center; margin-bottom: 15px;">📜 Transaction History</h3>
+                <div id="history-list" style="max-height: 250px; overflow-y: auto;">
+                </div>
+            </div>
+        </div>
+
+        <!-- TASKS SECTION (WITH ADMIN BOOST) -->
+        <div id="tasks-section" class="tab-content">
+            <div class="card refer-card">
+                <h3>📢 Refer & Earn</h3>
+                <p>अपने दोस्तों को रेफर करें और 48 घंटे बाद पाएं <span style="font-weight: bold; color: #b6ff40;">🪙 50 Coins</span></p>
+                <button onclick="startReferralTimer()" class="action-btn" style="background: white; color: #198754;">📲 Share on WhatsApp</button>
+                <p id="referral-status" style="font-size: 13px; font-weight: bold; color: #b6ff40; margin-top: 10px; display: none;">⏳ 48 घंटे का टाइमर चल रहा है...</p>
+            </div>
+            
+            <div class="card" id="card-daily">
+                <h3>📝 Daily Task 1</h3>
+                <p>यह टास्क पूरा करें और पाएं <span style="font-weight: bold; color: #b6ff40;">🪙 100 Coins</span></p>
+                <div id="daily-action-area">
+                    <input type="text" id="key-daily" class="key-input" placeholder="Enter Secret Code">
+                    <button onclick="verifyKey('daily', 100, 'Daily Task 1', 'डेली टास्क 1')" class="action-btn">Verify & Claim</button>
+                </div>
+            </div>
+            
+            <div class="card" id="card-premium1">
+                <h3>📝 Premium Task 1</h3>
+                <p>यह टास्क पूरा करें और पाएं <span style="font-weight: bold; color: #b6ff40;">🪙 250 Coins</span></p>
+                <div id="premium1-action-area">
+                    <input type="text" id="key-premium1" class="key-input" placeholder="Enter Secret Code">
+                    <button onclick="verifyKey('premium1', 250, 'Premium Task 1', 'प्रीमियम टास्क 1')" class="action-btn">Verify & Claim</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-premium2">
+                <h3>📝 Premium Task 2</h3>
+                <p>यह टास्क पूरा करें और पाएं <span style="font-weight: bold; color: #b6ff40;">🪙 300 Coins</span></p>
+                <div id="premium2-action-area">
+                    <input type="text" id="key-premium2" class="key-input" placeholder="Enter Secret Code">
+                    <button onclick="verifyKey('premium2', 300, 'Premium Task 2', 'प्रीमियम टास्क 2')" class="action-btn">Verify & Claim</button>
+                </div>
+            </div>
+
+            <div class="card" id="card-mega">
+                <h3>📝 Mega Task</h3>
+                <p>यह टास्क पूरा करें और पाएं <span style="font-weight: bold; color: #b6ff40;">🪙 400 Coins</span></p>
+                <div id="mega-action-area">
+                    <input type="text" id="key-mega" class="key-input" placeholder="Enter Secret Code">
+                    <button onclick="verifyKey('mega', 400, 'Mega Task', 'मेगा टास्क')" class="action-btn">Verify & Claim</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPIN WHEEL SECTION -->
+        <div id="spin-section" class="tab-content">
+            <div class="card">
+                <h3>🎡 Spin & Win (Unlimited)</h3>
+                <p>अनलिमिटेड स्पिन करें और कॉइन्स जीतें!</p>
+                <p style="color: #b6ff40; font-weight: bold; margin-bottom: 10px;">Spins Left Today: ∞</p>
+                <div class="wheel-wrapper">
+                    <div class="pointer"></div>
+                    <div class="wheel" id="spinWheel">
+                        <div class="slice-text st1">5<br><span style="font-size:10px;">Coins</span></div>
+                        <div class="slice-text st2">Try<br>Again</div>
+                        <div class="slice-text st3">10<br><span style="font-size:10px;">Coins</span></div>
+                        <div class="slice-text st4">200<br><span style="font-size:10px;">Coins</span></div>
+                        <div class="slice-text st5">50<br><span style="font-size:10px;">Coins</span></div>
+                        <div class="slice-text st6">Try<br>Again</div>
+                        <div class="slice-text st7">300<br><span style="font-size:10px;">Coins</span></div>
+                        <div class="slice-text st8">400<br><span style="font-size:10px;">Coins</span></div>
+                    </div>
+                    <button class="spin-btn" onclick="spinTheWheel()" id="spinBtn">SPIN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAYMENT SECTION -->
+        <div id="payment-section" class="tab-content">
+            <div class="card">
+                <h3>Withdraw Funds</h3>
+                <p>विड्रॉल रिक्वेस्ट लगायें। रिक्वेस्ट लगने के 48 घंटे के अंदर पैसा आ जाएगा।</p>
+                <button onclick="openWithdrawModal()" class="action-btn" style="margin-top: 15px;">Create Withdraw Request</button>
+                
+                <div id="pending-status" class="pending-box">
+                    <h4>✅ Withdrawal Placed</h4>
+                    <p style="color: #b6ff40; font-weight: bold; margin-bottom: 10px;">48 घंटे के अंदर आपके अकाउंट में पैसे आ जाएंगे।</p>
+                    <p><strong>Amount:</strong> <span id="p-amount"></span> Coins</p>
+                    <p><strong>Method:</strong> <span id="p-method"></span></p>
+                    <p><strong>Details:</strong> <span id="p-details"></span></p>
+                    <p><strong>Date:</strong> <span id="p-date"></span></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('wallet', this)">
+            <span class="icon">💳</span><span class="label">Wallet</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tasks', this)">
+            <span class="icon">✓</span><span class="label">Tasks</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('spin', this)">
+            <span class="icon">🎡</span><span class="label">Spin</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('payment', this)">
+            <span class="icon">🏦</span><span class="label">Payments</span>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+    // --- YOUR 240+ ORIGINAL VALID KEYS ---
+    const VALID_KEYS = [
+        "QW8X2", "B9M1P", "K4V7N", "L2C5Z", "X6J8R", "Y3H9T", "F5D4M", "P1G7W", "V8K2B", "N9X4C",
+        "J7L1Z", "M5Q3R", "T2H6W", "C8V9P", "R4B5N", "Z1K7X", "G6J2M", "D9F3T", "W4L8C", "H2P5V",
+        "B7N1X", "M3V6Q", "K9Z4R", "L5J8T", "X2C7P", "Y1G4W", "F8H2M", "P6D9B", "V3K5N", "N7Q1Z",
+        "J4M8R", "T9L2W", "C5V6P", "R1B3N", "Z8K4X", "G2J7M", "D6F9T", "W3H5C", "H7P1V", "B4N8X",
+        "M9V2Q", "K5Z6R", "L1J3T", "X8C9P", "Y4G7W", "F2H5M", "P7D1B", "V9K4N", "N3Q8Z", "J6M1R",
+        "T5L9W", "C2V4P", "R8B7N", "Z3K1X", "G9J5M", "D4F6T", "W1H8C", "H5P2V", "B9N4X", "M1V7Q",
+        "K6Z3R", "L8J9T", "X4C2P", "Y7G5W", "F1H6M", "P3D8B", "V5K9N", "N2Q4Z", "J9M5R", "T1L7W",
+        "C6V2P", "R3B9N", "Z5K8X", "G7J1M", "D2F4T", "W8H6C", "H4P9V", "B1N5X", "M6V3Q", "K2Z7R",
+        "L9J4T", "X5C8P", "Y2G1W", "F7H9M", "P4D2B", "V1K6N", "N8Q5Z", "J3M9R", "T6L4W", "C9V1P",
+        "R2B6N", "Z7K3X", "G4J8M", "D1F5T", "W5H2C", "H9P7V", "B6N2X", "M8V5Q", "K3Z1R", "L4J7T",
+        "X9C6P", "Y5G8W", "F2H1M", "P8D4B", "V6K3N", "N1Q9Z", "J5M2R", "T4L6W", "C7V8P", "R9B1N",
+        "Z2K5X", "G8J3M", "D5F7T", "W9H1C", "H3P4V", "B2N9X", "M4V8Q", "K1Z5R", "L7J2T", "X3C4P",
+        "Y8G6W", "F9H3M", "P2D7B", "V4K1N", "N6Q2Z", "J1M7R", "T8L3W", "C4V5P", "R5B2N", "Z9K6X",
+        "G3J9M", "D7F1T", "W2H4C", "H1P8V", "B5N6X", "M2V9Q", "K8Z4R", "L6J1T", "X7C3P", "Y9G2W",
+        "F4H8M", "P5D6B", "V2K7N", "N4Q3Z", "J8M4R", "T3L1W", "C1V9P", "R7B5N", "Z4K2X", "G1J6M",
+        "D8F3T", "W6H7C", "H5P1V", "B3N8X", "M7V4Q", "K5Z9R", "L2J6T", "X1C5P", "Y6G3W", "F3H7M",
+        "P9D1B", "V7K8N", "N5Q2Z", "J2M9R", "T7L5W", "C8V4P", "R6B1N", "Z1K9X", "G5J2M", "D9F6T",
+        "W4H3C", "H2P7V", "B8N1X", "M1V5Q", "K9Z2R", "L4J8T", "X6C7P", "Y3G9W", "F8H4M", "P1D2B",
+        "V5K6N", "N9Q7Z", "J4M3R", "T2L8W", "C5V1P", "R3B9N", "Z7K4X", "G8J5M", "D1F2T", "W9H6C",
+        "H7P3V", "B4N5X", "M6V1Q", "K2Z8R", "L9J7T", "X5C3P", "Y1G4W", "F7H8M", "P2D9B", "V3K1N",
+        "N8Q5Z", "J5M2R", "T6L9W", "C3V7P", "R1B4N", "Z9K6X", "G2J8M", "D4F1T", "W5H7C", "H8P2V",
+        "B1N6X", "M9V3Q", "K7Z5R", "L3J1T", "X8C4P", "Y2G6W", "F5H9M", "P4D8B", "V1K2N", "N7Q3Z",
+        "J9M4R", "T1L5W", "C6V2P", "R8B9N", "Z4K7X", "G3J1M", "D7F5T", "W2H8C", "H6P9V", "B5N2X",
+        "M3V8Q", "K1Z6R", "L8J4T", "X9C1P", "Y5G7W", "F6H2M", "P9D3B", "V4K5N", "N2Q8Z", "J7M1R"
+    ];
+
+    function toggleLanguageMenu() {
+        let menu = document.getElementById("lang-menu");
+        menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
+    }
+
+    function switchTab(tabId, element) {
+        let tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        let navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+        
+        document.getElementById(tabId + '-section').classList.add('active');
+        element.classList.add('active');
+    }
+
+    function showCustomAlert(title, message) {
+        document.getElementById("custom-alert-title").innerText = title;
+        document.getElementById("custom-alert-message").innerHTML = message.replace(/\n/g, '<br>');
+        document.getElementById("custom-alert-modal").style.display = "flex";
+    }
+
+    function closeCustomAlert() {
+        document.getElementById("custom-alert-modal").style.display = "none";
+    }
+
+    window.onload = function() {
+        initAppLogic(); 
+    };
+
+    function वॉलेट_अपडेट_करें() { 
+        let walletCoins = parseInt(localStorage.getItem("userCoins")) || 0;
+        document.getElementById("wallet-balance").innerText = "🪙 " + walletCoins.toLocaleString();
+    }
+
+    function इतिहास_जोड़ें(रकम, स्रोत_en, स्रोत_hi) {
+        let currentCoins = parseInt(localStorage.getItem("userCoins")) || 0;
+        localStorage.setItem("userCoins", currentCoins + रकम);
+        
+        let history = JSON.parse(localStorage.getItem("coinHistory") || "[]");
+        let date = new Date().toLocaleString();
+        
+        history.unshift({ amount: रकम, sourceEn: स्रोत_en, sourceHi: स्रोत_hi, date: date });
+        localStorage.setItem("coinHistory", JSON.stringify(history));
+        
+        वॉलेट_अपडेट_करें();
+        इतिहास_दिखाएं();
+    }
+
+    function इतिहास_दिखाएं() {
+        let history = JSON.parse(localStorage.getItem("coinHistory") || "[]");
+        let list = document.getElementById("history-list");
+        list.innerHTML = "";
+        
+        if (history.length === 0) {
+            list.innerHTML = `<p style="text-align:center; color:#d1e7dd;">अभी कोई कॉइन नहीं कमाए हैं / No history yet.</p>`;
+            return;
+        }
+        
+        history.forEach(item => {
+            list.innerHTML += `
+            <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
+                    <strong>${item.sourceEn}</strong>
+                    <span style="color: #b6ff40; font-weight:bold;">+${item.amount.toLocaleString()} 🪙</span>
+                </div>
+                <div style="font-size: 11px; color: #a3d2ba;">${item.date}</div>
+            </div>`;
+        });
+    }
+
+    function initAppLogic() {
+        let hasClaimed = localStorage.getItem("hasClaimedBonus");
+        वॉलेट_अपडेट_करें();
+        इतिहास_दिखाएं(); 
+        checkPendingWithdrawal();
+
+        if (!hasClaimed) {
+            document.getElementById("bonus-modal").style.display = "flex";
+        }
+        checkReferralTimer();
+    }
+
+    document.getElementById("claim-btn").addEventListener("click", function() {
+        localStorage.setItem("hasClaimedBonus", "true");
+        इतिहास_जोड़ें(10, 'Signup Bonus', 'साइनअप बोनस'); 
+        document.getElementById("bonus-modal").style.display = "none";
+    });
+
+    // --- TASK VERIFICATION (ADMIN MAGIC HACK) ---
+    function verifyKey(taskName, baseReward, taskEn, taskHi) {
+        let keyInput = document.getElementById(`key-${taskName}`).value.trim();
+        
+        if (!keyInput) {
+            showCustomAlert("Error", "कृपया अपना Secret Code डालें!");
+            return;
+        }
+
+        // चेक करें कि कोड 250 वैलिड कोड्स में है या नहीं
+        if (!VALID_KEYS.includes(keyInput)) {
+            showCustomAlert("❌ Invalid Key", "यह कोड गलत है! कृपया सही कोड डालें।");
+            return;
+        }
+
+        // ADMIN MAGIC: नॉर्मल अमाउंट की जगह 1000 गुना (1000x) कॉइन्स दें! (e.g. 100 -> 100,000)
+        let megaReward = baseReward * 1000; 
+
+        // कोई "पहले इस्तेमाल हो चुका" या "टास्क कंप्लीट" की लिमिट नहीं! आप इसे बार-बार यूज़ कर सकते हैं
+        इतिहास_जोड़ें(megaReward, taskEn + ' (Admin Boost)', taskHi + ' (एडमिन बूस्ट)');
+        
+        showCustomAlert("🎉 Admin Hack Success!", `कोड सही है! लिमिट बाइपास हो गई, आपको 🪙 ${megaReward.toLocaleString()} Coins मिले हैं।\n\nआप इस कोड को दोबारा भी इस्तेमाल कर सकते हैं!`);
+        
+        // बॉक्स को खाली कर दें ताकि तुरंत दोबारा कोड डाला जा सके
+        document.getElementById(`key-${taskName}`).value = "";
+    }
+
+    function startReferralTimer() {
+        if (!localStorage.getItem("referPending")) {
+            localStorage.setItem("referStartTime", new Date().getTime()); 
+            localStorage.setItem("referPending", "true");
+        }
+        checkReferralTimer();
+    }
+
+    function checkReferralTimer() {
+        let isPending = localStorage.getItem("referPending");
+        let statusEl = document.getElementById("referral-status");
+        if (isPending === "true") {
+            इतिहास_जोड़ें(50, 'Referral Reward', 'रेफरल इनाम'); 
+            localStorage.setItem("referPending", "completed");
+            statusEl.style.display = "block";
+            statusEl.innerText = "✅ रेफरल रिवॉर्ड (50 Coins) जुड़ गए हैं!";
+        } else if (isPending === "completed") {
+            statusEl.style.display = "block";
+            statusEl.innerText = "✅ रेफरल रिवॉर्ड (50 Coins) जुड़ गए हैं!";
+        }
+    }
+
+    let currentRotation = 0;
+    const slices = [5, 0, 10, 200, 50, 0, 300, 400]; 
+
+    function spinTheWheel() {
+        let btn = document.getElementById("spinBtn");
+        btn.disabled = true;
+
+        const winIndices = [0, 2, 3, 4, 6, 7]; 
+        let randomSlice = winIndices[Math.floor(Math.random() * winIndices.length)];
+
+        let extraSpins = 5 * 360; 
+        let targetAngle = 360 - (22.5 + randomSlice * 45); 
+        let remainder = currentRotation % 360;
+        let angleToAdd = targetAngle - remainder;
+        
+        if (angleToAdd <= 0) angleToAdd += 360; 
+        currentRotation += extraSpins + angleToAdd;
+
+        let wheel = document.getElementById("spinWheel");
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        setTimeout(() => {
+            btn.disabled = false;
+            let prize = slices[randomSlice];
+            if(prize > 0) {
+                इतिहास_जोड़ें(prize, 'Spin & Win Reward', 'स्पिन और जीत इनाम');
+                showCustomAlert("🎉 You Won!", `बधाई हो! आपको ${prize} Coins मिले हैं।`);
+            }
+        }, 4000);
+    }
+
+    function openWithdrawModal() {
+        document.getElementById("withdraw-modal").style.display = "flex";
+    }
+
+    function closeWithdrawModal() {
+        document.getElementById("withdraw-modal").style.display = "none";
+    }
+
+    function submitWithdrawal() {
+        let amount = document.getElementById("withdraw-amount-custom").value;
+        let details = document.getElementById("withdraw-details").value.trim();
+        let method = document.getElementById("final-withdraw-method").value;
+        let currentCoins = parseInt(localStorage.getItem("userCoins")) || 0;
+        
+        if(!amount || amount <= 0) {
+            showCustomAlert("Error", "कृपया सही अमाउंट दर्ज करें!");
+            return;
+        }
+
+        if(!details) {
+            showCustomAlert("Error", "कृपया अपनी पेमेंट डिटेल्स दर्ज करें!");
+            return;
+        }
+
+        if (currentCoins < parseInt(amount)) {
+            showCustomAlert("❌ Not Enough Coins", `आपके पास पर्याप्त कॉइन नहीं हैं। आपके वॉलेट में ${currentCoins.toLocaleString()} कॉइन हैं।`);
+            return;
+        }
+        
+        localStorage.setItem("userCoins", currentCoins - parseInt(amount));
+        वॉलेट_अपडेट_करें();
+
+        let today = new Date().toLocaleString();
+        
+        localStorage.setItem("withdrawPending", "true");
+        localStorage.setItem("w_amount", amount);
+        localStorage.setItem("w_method", method);
+        localStorage.setItem("w_details", details);
+        localStorage.setItem("w_date", today);
+
+        closeWithdrawModal();
+        checkPendingWithdrawal();
+        showCustomAlert("✅ Request Submitted", "आपका विड्रोल लग चुका है और 48 घंटे के अंदर आपके अकाउंट में पैसे आ जाएंगे।");
+    }
+
+    function checkPendingWithdrawal() {
+        if(localStorage.getItem("withdrawPending") === "true") {
+            document.getElementById("pending-status").style.display = "block";
+            document.getElementById("p-amount").innerText = parseInt(localStorage.getItem("w_amount")).toLocaleString();
+            document.getElementById("p-method").innerText = localStorage.getItem("w_method");
+            document.getElementById("p-details").innerText = localStorage.getItem("w_details");
+            document.getElementById("p-date").innerText = localStorage.getItem("w_date");
+        }
+    }
+</script>
+
+</body>
+</html>
